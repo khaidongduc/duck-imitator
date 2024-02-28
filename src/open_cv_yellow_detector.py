@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import print_function
 import roslib
+import numpy as np
 import sys
 import rospy
 import cv2
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as ImageMsg
 from cv_bridge import CvBridge, CvBridgeError
+from PIL import Image as Img
 
 from utils import get_limits
 
@@ -14,9 +16,9 @@ from utils import get_limits
 class image_converter:
 
     def __init__(self):
-        self.image_pub = rospy.Publisher("image_topic", Image, queue_size=10)
+        self.image_pub = rospy.Publisher("image_topic", ImageMsg, queue_size=10)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/camera/image", ImageMsg, self.callback)
 
     def callback(self, data):
         try:
@@ -30,16 +32,24 @@ class image_converter:
 
         # Yellow color detection
         yellow = [0, 255, 255]  # yellow in BGR colorspace
+
+
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         lowerLimit, upperLimit = get_limits(color=yellow)
         mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
+
+       
+        mask_ = Img.fromarray(mask)
+        bbox = mask_.getbbox()
+
+        if bbox is not None:
+            x1, y1, x2, y2 = bbox
+            cv_image = cv2.rectangle(cv_image, (x1, y1), (x1 + x2, y1 + y2), (0, 255, 0), 5)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        for cnt in contours:
-            x, y, w, h = cv2.boundingRect(cnt)
-            cv_image = cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
         
         cv2.imshow("Image window", cv_image)
+
         cv2.waitKey(3)
 
         # Convert OpenCV image back to ROS image message if you need to publish it
