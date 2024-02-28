@@ -24,6 +24,9 @@ class image_converter:
             cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
+        (rows,cols,channels) = cv_image.shape
+        print("Number of rows", rows)
+        print("Number of columns", cols)
 
         # Yellow color detection
         yellow = [0, 255, 255]  # yellow in BGR colorspace
@@ -35,6 +38,9 @@ class image_converter:
         for cnt in contours:
             x, y, w, h = cv2.boundingRect(cnt)
             cv_image = cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        
+        cv2.imshow("Image window", cv_image)
+        cv2.waitKey(3)
 
         # Convert OpenCV image back to ROS image message if you need to publish it
         try:
@@ -42,12 +48,16 @@ class image_converter:
         except CvBridgeError as e:
             print(e)
 
-if __name__ == '__main__':
-    rospy.init_node('image_converter', anonymous=True)
+def main(args):
     ic = image_converter()
+    rospy.init_node('image_converter', anonymous=True)
     try:
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
     cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    main(sys.argv)
+
     
