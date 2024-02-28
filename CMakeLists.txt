@@ -9,7 +9,6 @@ project(duck_imitator)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
-  opencv2
   roscpp
   rospy
   sensor_msgs
@@ -108,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES duck_imitator
-#  CATKIN_DEPENDS cv_bridge opencv2 roscpp rospy sensor_msgs std_msgs
+#  CATKIN_DEPENDS cv_bridge roscpp rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
