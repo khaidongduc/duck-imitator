@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     # setup
     rob = AvoidObstTurtleBot(diameter, distance_tolerance)
-    rospy.init_node('avoid_obstacles', anonymous=True)
+    rospy.init_node('avoid', anonymous=True)
 
 
 
