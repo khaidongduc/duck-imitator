@@ -68,6 +68,8 @@ class AvoidObstTurtleBot:
             out_msg.angular.z = max_ang_spd
             # possibly found a heading if keep turning around
 
+        return out_msg
+
 
 if __name__ == '__main__':
 
