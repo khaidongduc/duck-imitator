@@ -39,10 +39,13 @@ class image_converter:
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         lowerLimit, upperLimit = get_limits(color=yellow)
         mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
+ 
 
        
         mask_ = Img.fromarray(mask)
+ 
         bbox = mask_.getbbox()
+        print("Bbox", bbox)
 
         if bbox is not None:
             x1, y1, x2, y2 = bbox
@@ -56,7 +59,9 @@ class image_converter:
 
             self.point_pub.publish(points)
 
-        contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
+
+        #contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         
         cv2.imshow("Image window", cv_image)
