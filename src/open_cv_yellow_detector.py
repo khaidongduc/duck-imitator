@@ -37,15 +37,17 @@ class image_converter:
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         lowerLimit, upperLimit = get_limits(color=yellow)
         mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
-
+        mask = cv2.erode(mask, None, iterations = 2)
+        mask = cv2.dilate(mask, None, iterations = 2)
        
         mask_ = Img.fromarray(mask)
         bbox = mask_.getbbox()
 
         if bbox is not None:
             x1, y1, x2, y2 = bbox
-            cv_image = cv2.rectangle(cv_image, (x1, y1), (x1 + x2, y1 + y2), (0, 255, 0), 5)
+            cv_image = cv2.rectangle(cv_image, (x1, y1), (x2, y2), (0, 255, 0), 5)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
 
         
         cv2.imshow("Image window", cv_image)
