@@ -19,6 +19,7 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
+from std_msgs.msg import Float32MultiArray
 
 class AvoidObstTurtleBot:
     def __init__(self, diameter, distance_tolrance):
@@ -65,20 +66,27 @@ class AvoidObstTurtleBot:
         out_msg = Twist()
 
         if self.heading is None: # spin around if no heading is given
-            out_msg.angular.z = max_ang_spd / 2
-            # possibly found a heading if keep turning around
             return out_msg
 
-        theta, d = self.heading
-        if abs(theta) < 0.2:
-            out_msg.angular.z = 0.1 * theta * max_ang_spd
+        theta = self.heading.data[1]
+        d = self.heading.data[0] # m
+        if d <= 0:
+            return out_msg    
+        if abs(2 * math.pi - theta) < abs(theta):
+            theta = - (2 * math.pi - theta)
+
+        print(theta, d)
+
+        if abs(theta) > 0.2:
+            out_msg.angular.z = 0.4 * theta * max_ang_spd
             return out_msg
         
         if d > 0.5:
-            out_msg.linear.x = 0.1 * d * max_lin_speed
+            out_msg.linear.x = 0.6 * d * max_lin_speed
             return out_msg
 
-        raise Exception("adjust failed")
+        return out_msg
+        # raise Exception("adjust failed")
 
 if __name__ == '__main__':
 
@@ -98,7 +106,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/scan", LaserScan, rob.laser_update)   
 
     rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
-    rospy.Subscriber("/heading", Odometry, rob.heading_update) # to know the desired heading
+    rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
 
     rate = rospy.Rate(10)
 
