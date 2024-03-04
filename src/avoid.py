@@ -65,7 +65,7 @@ class AvoidObstTurtleBot:
         out_msg = Twist()
 
         if self.heading is None: # spin around if no heading is given
-            out_msg.angular.z = max_ang_spd
+            out_msg.angular.z = max_ang_spd / 2
             # possibly found a heading if keep turning around
 
         return out_msg
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/scan", LaserScan, rob.laser_update)   
 
     rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
-    rospy.Subscriber("/heading", Odometry, rob.heading_update) # to know the desired
+    rospy.Subscriber("/heading", Odometry, rob.heading_update) # to know the desired heading
 
     rate = rospy.Rate(10)
 
