@@ -65,11 +65,20 @@ class AvoidObstTurtleBot:
         out_msg = Twist()
 
         if self.heading is None: # spin around if no heading is given
-            out_msg.angular.z = max_ang_spd
+            out_msg.angular.z = max_ang_spd / 2
             # possibly found a heading if keep turning around
+            return out_msg
 
-        return out_msg
+        theta, d = self.heading
+        if abs(theta) < 0.2:
+            out_msg.angular.z = 0.1 * theta * max_ang_spd
+            return out_msg
+        
+        if d > 0.5:
+            out_msg.linear.x = 0.1 * d * max_lin_speed
+            return out_msg
 
+        raise Exception("adjust failed")
 
 if __name__ == '__main__':
 
