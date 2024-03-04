@@ -29,12 +29,11 @@ class image_converter:
         except CvBridgeError as e:
             print(e)
         (rows,cols,channels) = cv_image.shape
-        #print("Number of rows", rows)
-        #print("Number of columns", cols)
+        print("Number of rows", rows)
+        print("Number of columns", cols)
 
         # Yellow color detection
         yellow = [0, 255, 255]  # yellow in BGR colorspace
-        red = [255, 0, 0]
 
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         lowerLimit, upperLimit = get_limits(color=yellow)
