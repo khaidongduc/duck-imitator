@@ -26,11 +26,8 @@ from std_msgs.msg import Float32MultiArray
 diameter = 0.07 # m
 theta_tolerance = 0.2 # rad
 linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-safe_distance = 0.1 # m
+safe_distance = 0.2 # m
 follow_distance = 0.5 # m
-
-angular_spd_control = 0.8 
-lin_spd_control = 0.6
 
 
 class AvoidObstTurtleBot:
@@ -84,7 +81,7 @@ class AvoidObstTurtleBot:
         
         out_msg = Twist()
 
-        if self.front_dis < self.safe_distance:
+        if self.front_dis < self.distance_tolerance:
             return out_msg # assume the only obstacles of the robots are themselves
             # wait for the robot in the front to move away
 
@@ -104,6 +101,9 @@ class AvoidObstTurtleBot:
             theta = - (2 * math.pi - theta)
 
         
+        angular_spd_control = min(1, abs(theta) / (max_ang_spd)) # priorize rotating when theta is large
+        lin_spd_control = 1 - angular_spd_control
+
         if abs(theta) > theta_tolerance:
             out_msg.angular.z = angular_spd_control * theta * max_ang_spd
             # make sure angular speed don't exceed max
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     rospy.Subscriber("/odom", Odometry, rob.odom_update)
     rospy.Subscriber("/scan", LaserScan, rob.laser_update)   
 
-    rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
+    # rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
     rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
 
 
@@ -145,7 +145,7 @@ if __name__ == '__main__':
         msg = rob.create_adjusted_twist(
             theta_tolerance=theta_tolerance,
             follow_distance=follow_distance)
-        # print(msg)
+        print(msg)
         pub.publish(msg)
         rate.sleep()
 
