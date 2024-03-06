@@ -21,6 +21,15 @@ from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Float32MultiArray
 
+
+# constant
+diameter = 0.07 # m
+theta_tolerance = 0.2 # rad
+linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
+safe_distance = 0.1 # m
+follow_distance = 0.5 # m
+
+
 class AvoidObstTurtleBot:
     def __init__(self, diameter, distance_tolrance):
            # setup
@@ -65,7 +74,11 @@ class AvoidObstTurtleBot:
         if len(self.heading.data) == 2: # valid
             self.last_valid_heading = heading_msg
 
-    def create_adjusted_twist(self, max_lin_speed=0.3, max_ang_spd=math.radians(30)):
+    def create_adjusted_twist(self, 
+            follow_distance=0.5, # m
+            theta_tolerance = 0.2, # rad 
+            max_lin_speed=0.3, max_ang_spd=math.radians(30)):
+        
         out_msg = Twist()
 
         if self.front_dis < self.safe_distance:
@@ -87,29 +100,19 @@ class AvoidObstTurtleBot:
         if abs(2 * math.pi - theta) < abs(theta):
             theta = - (2 * math.pi - theta)
 
-        # print(theta, d)
-
+        
         if abs(theta) > 0.2:
             out_msg.angular.z = 0.8 * theta * max_ang_spd
+            # make sure angular speed don't exceed max
             if abs(out_msg.angular.z) >= max_ang_spd:
                 out_msg.angular.z = out_msg.angular.z / abs(out_msg.angular.z) * max_ang_spd
- 
-            # return out_msg
-        
-        if d > 0.5:
-            out_msg.linear.x = max(max_lin_speed, 0.6 * d * max_lin_speed)
+        if d > follow_distance:
+            out_msg.linear.x = max(max_lin_speed, 0.2 * d * max_lin_speed)
             # return out_msg
     
         return out_msg
-        # raise Exception("adjust failed")
 
 if __name__ == '__main__':
-
-    # constant
-    diameter = 0.07 # m
-    distance_tolerance = 0.5 # m
-    linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-    safe_distance = 0.1 # m
 
     # setup
     rob = AvoidObstTurtleBot(diameter, distance_tolerance)
@@ -134,7 +137,9 @@ if __name__ == '__main__':
     
     pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
     while not rospy.is_shutdown():
-        msg = rob.create_adjusted_twist()
+        msg = rob.create_adjusted_twist(
+            theta_tolerance=theta_tolerance,
+            follow_distance=follow_distance)
         # print(msg)
         pub.publish(msg)
         rate.sleep()
