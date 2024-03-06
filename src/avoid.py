@@ -58,6 +58,7 @@ class AvoidObstTurtleBot:
         self.init_odom = True
 
     def laser_update(self, laser_read):
+        print("Laser Update")
         angles = range(0, 360, 1)
         for angle in angles:
             self.distance_at_angle[angle] = float("inf") if laser_read.ranges[angle] == 0 else  laser_read.ranges[angle]
@@ -81,7 +82,7 @@ class AvoidObstTurtleBot:
         
         out_msg = Twist()
 
-        if self.front_dis < self.distance_tolerance:
+        if self.front_dis is None or self.front_dis < self.distance_tolerance:
             return out_msg # assume the only obstacles of the robots are themselves
             # wait for the robot in the front to move away
 
@@ -123,7 +124,7 @@ if __name__ == '__main__':
 
 
 
-    rospy.Subscriber("/odom", Odometry, rob.odom_update)
+    # rospy.Subscriber("/odom", Odometry, rob.odom_update)
     rospy.Subscriber("/scan", LaserScan, rob.laser_update)   
 
     # rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
@@ -132,10 +133,10 @@ if __name__ == '__main__':
 
 
     
-    # wait for odometer and lidar to response
-    rate = rospy.Rate(1)
-    while not rospy.is_shutdown() and (not rob.init_laser or not rob.init_odom):
-        print("wait for sensors to response")
+    # wait for lidar to response
+    rate = rospy.Rate(0.5)
+    while not rospy.is_shutdown() and (not rob.init_laser):
+        print("wait for sensors to response", rob.init_laser)
         rate.sleep()
     print("Sensors responded")
 

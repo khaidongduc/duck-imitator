@@ -16,12 +16,12 @@
     respawn="true"
   />
 
-  <!-- <node
+  <node
     pkg="duck_imitator"
     type="avoid.py"
     name="avoid"
     output="screen"
     respawn="true"
-  /> -->
+  />
 
 </launch>
