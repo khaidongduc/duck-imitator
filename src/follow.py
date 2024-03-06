@@ -8,7 +8,7 @@ from std_msgs.msg import String, Float32MultiArray
 from sensor_msgs.msg import Image as ImageMsg
 from geometry_msgs.msg import Polygon, Point32, PoseArray
 
-from utils import get_limits
+from utils import get_limits, findArea
 import rospy, math
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
@@ -32,6 +32,15 @@ class Follow:
         self.follow_array = []
         #self.follow_pub = rospy.Publisher("follow_topic", Float32MultiArray, queue_size=10)
     def follow_callback(self, data):
+
+        if len(data.points) == 0:
+            self.follow_array = []
+            print("Distance", None)
+            print("Theta angle", None)
+            return self.follow_array
+
+        print(data.points)
+
         self.x1 = data.points[0].x
         self.y1 = data.points[0].y
         self.z1 = data.points[0].z
@@ -48,6 +57,7 @@ class Follow:
         img_obj_distance = findDistance(obj_mid_point, img_mid_point)
 
         area = findArea(self.x1, self.x2, self.y1, self.y2)
+
         camera_distance = 111 - math.sqrt(area)/0.63
 
         self.distance = camera_distance / 2
@@ -68,9 +78,6 @@ def findDistance(this_point,another_point):
     y1 = another_point[1]
     newDistance = math.sqrt((x1-x0)**2 + (y1-y0)**2)
     return newDistance
-
-def findArea(x1, x2, y1, y2):
-    return (x2 - x1) * (y2 - y1)
 
 if __name__ == '__main__':
     rob = Follow()

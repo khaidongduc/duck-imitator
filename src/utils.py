@@ -22,3 +22,6 @@ def get_limits(color):
         upperLimit = np.array([hue + 10, 255, 255], dtype=np.uint8)
 
     return lowerLimit, upperLimit
+
+def findArea(x1, x2, y1, y2):
+    return (x2 - x1) * (y2 - y1)

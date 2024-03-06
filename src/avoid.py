@@ -37,6 +37,7 @@ class AvoidObstTurtleBot:
         self.front_dis = None
         self.cur_twist = None
         self.heading = None
+        self.last_valid_heading = None
 
         self.init_odom = False
         self.init_laser = False
@@ -61,11 +62,21 @@ class AvoidObstTurtleBot:
 
     def heading_update(self, heading_msg):
         self.heading = heading_msg
+        if len(self.heading.data) == 2: # valid
+            self.last_valid_heading = heading_msg
 
-    def create_adjusted_twist(self, max_lin_speed=0.3, max_ang_spd=math.radians(20)):
+    def create_adjusted_twist(self, max_lin_speed=0.3, max_ang_spd=math.radians(30)):
         out_msg = Twist()
 
-        if self.heading is None: # spin around if no heading is given
+
+
+
+        if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
+            out_msg.angular.z = max_ang_spd / 2
+            if self.last_valid_heading is not None:
+                last_theta = self.last_valid_heading.data[1]
+                # print("last_theta:", last_theta)
+                out_msg.angular.z *= - last_theta / abs(last_theta)
             return out_msg
 
         theta = self.heading.data[1]
@@ -75,16 +86,19 @@ class AvoidObstTurtleBot:
         if abs(2 * math.pi - theta) < abs(theta):
             theta = - (2 * math.pi - theta)
 
-        print(theta, d)
+        # print(theta, d)
 
         if abs(theta) > 0.2:
-            out_msg.angular.z = 0.4 * theta * max_ang_spd
-            return out_msg
+            out_msg.angular.z = 0.8 * theta * max_ang_spd
+            if abs(out_msg.angular.z) >= max_ang_spd:
+                out_msg.angular.z = out_msg.angular.z / abs(out_msg.angular.z) * max_ang_spd
+ 
+            # return out_msg
         
         if d > 0.5:
-            out_msg.linear.x = 0.6 * d * max_lin_speed
-            return out_msg
-
+            out_msg.linear.x = max(max_lin_speed, 0.6 * d * max_lin_speed)
+            # return out_msg
+    
         return out_msg
         # raise Exception("adjust failed")
 
@@ -120,6 +134,7 @@ if __name__ == '__main__':
     pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist()
+        # print(msg)
         pub.publish(msg)
         rate.sleep()
 

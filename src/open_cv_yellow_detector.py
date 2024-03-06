@@ -12,8 +12,10 @@ from cv_bridge import CvBridge, CvBridgeError
 from PIL import Image as Img
 from geometry_msgs.msg import Polygon, Point32
 
-from utils import get_limits
+from utils import get_limits, findArea
 
+
+THRES = 0
 
 class image_converter:
 
@@ -30,8 +32,8 @@ class image_converter:
         except CvBridgeError as e:
             print(e)
         (rows,cols,channels) = cv_image.shape
-        print("Number of rows", rows)
-        print("Number of columns", cols)
+        # print("Number of rows", rows)
+        # print("Number of columns", cols)
 
         # Yellow color detection
         yellow = [0, 255, 255]  # yellow in BGR colorspace
@@ -47,23 +49,29 @@ class image_converter:
         mask_ = Img.fromarray(mask)
  
         bbox = mask_.getbbox()
-        #print("Bbox", bbox)
+        
 
         if bbox is not None:
             x1, y1, x2, y2 = bbox
-            cv_image = cv2.rectangle(cv_image, (x1, y1), (x2, y2), (0, 255, 0), 5)
+        
+            area = findArea(x1, x2, y1, y2)
+            if area < THRES * rows * cols:
+                bbox = None
+                self.point_pub.publish(Polygon())
+            else:
+                cv_image = cv2.rectangle(cv_image, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                points = Polygon()
+                points.points.append(Point32(x=x1, y=y1, z=0))
+                points.points.append(Point32(x=x2, y=y2, z=0))
+                points.points.append(Point32(x=x1, y=y2, z=0))
+                points.points.append(Point32(x=x2, y=y1, z=0))
 
-            points = Polygon()
-            points.points.append(Point32(x=x1, y=y1, z=0))
-            points.points.append(Point32(x=x2, y=y2, z=0))
-            points.points.append(Point32(x=x1, y=y2, z=0))
-            points.points.append(Point32(x=x2, y=y1, z=0))
+                self.point_pub.publish(points)
 
-            self.point_pub.publish(points)
-
-            print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
-            print("Area", (x2-x1)*(y2-y1))
-
+                print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
+                print("Area", (x2-x1)*(y2-y1))
+        else:
+            self.point_pub.publish(Polygon())
         #contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 
