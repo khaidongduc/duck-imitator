@@ -29,6 +29,9 @@ linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
 safe_distance = 0.1 # m
 follow_distance = 0.5 # m
 
+angular_spd_control = 0.8 
+lin_spd_control = 0.6
+
 
 class AvoidObstTurtleBot:
     def __init__(self, diameter, distance_tolrance):
@@ -101,13 +104,13 @@ class AvoidObstTurtleBot:
             theta = - (2 * math.pi - theta)
 
         
-        if abs(theta) > 0.2:
-            out_msg.angular.z = 0.8 * theta * max_ang_spd
+        if abs(theta) > theta_tolerance:
+            out_msg.angular.z = angular_spd_control * theta * max_ang_spd
             # make sure angular speed don't exceed max
             if abs(out_msg.angular.z) >= max_ang_spd:
                 out_msg.angular.z = out_msg.angular.z / abs(out_msg.angular.z) * max_ang_spd
         if d > follow_distance:
-            out_msg.linear.x = max(max_lin_speed, 0.2 * d * max_lin_speed)
+            out_msg.linear.x = max(max_lin_speed, lin_spd_control * d * max_lin_speed)
             # return out_msg
     
         return out_msg
