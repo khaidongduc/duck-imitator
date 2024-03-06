@@ -136,7 +136,7 @@ if __name__ == '__main__':
     # wait for lidar to response
     rate = rospy.Rate(0.5)
     while not rospy.is_shutdown() and (not rob.init_laser):
-        print("wait for sensors to response", rob.init_laser)
+        print("wait for sensors to response")
         rate.sleep()
     print("Sensors responded")
 

@@ -2,8 +2,8 @@
   
   <node
     pkg="duck_imitator"
-    type="open_cv_yellow_detector.py"
-    name="open_cv_yellow_detector"
+    type="yellow_detector.py"
+    name="yellow_detector"
     output="screen"
     respawn="true"
   />
