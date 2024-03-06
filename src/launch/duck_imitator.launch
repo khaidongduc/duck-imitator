@@ -5,6 +5,7 @@
     type="open_cv_yellow_detector.py"
     name="open_cv_yellow_detector"
     output="screen"
+    respawn="true"
   />
   
   <node
@@ -12,6 +13,7 @@
     type="follow.py"
     name="follow"
     output="screen"
+    respawn="true"
   />
 
   <node
@@ -19,6 +21,7 @@
     type="avoid.py"
     name="avoid"
     output="screen"
+    respawn="true"
   />
 
 </launch>

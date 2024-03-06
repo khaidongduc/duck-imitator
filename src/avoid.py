@@ -129,15 +129,17 @@ if __name__ == '__main__':
     rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
     rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
 
-    rate = rospy.Rate(10)
 
+
+    
     # wait for odometer and lidar to response
-    while not rob.init_laser or not rob.init_odom:
+    rate = rospy.Rate(1)
+    while not rospy.is_shutdown() and (not rob.init_laser or not rob.init_odom):
         print("wait for sensors to response")
         rate.sleep()
     print("Sensors responded")
 
-    
+    rate = rospy.Rate(10)
     pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist(
