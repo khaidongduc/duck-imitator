@@ -68,8 +68,9 @@ class AvoidObstTurtleBot:
     def create_adjusted_twist(self, max_lin_speed=0.3, max_ang_spd=math.radians(30)):
         out_msg = Twist()
 
-
-
+        if self.front_dis < self.safe_distance:
+            return out_msg # assume the only obstacles of the robots are themselves
+            # wait for the robot in the front to move away
 
         if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
             out_msg.angular.z = max_ang_spd / 2
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     diameter = 0.07 # m
     distance_tolerance = 0.5 # m
     linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-    safe_distance = 0.5 # m
+    safe_distance = 0.1 # m
 
     # setup
     rob = AvoidObstTurtleBot(diameter, distance_tolerance)
