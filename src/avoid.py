@@ -118,7 +118,7 @@ class AvoidObstTurtleBot:
 if __name__ == '__main__':
 
     # setup
-    rob = AvoidObstTurtleBot(diameter, distance_tolerance)
+    rob = AvoidObstTurtleBot(diameter, safe_distance)
     rospy.init_node('avoid', anonymous=True)
 
 
