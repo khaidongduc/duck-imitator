@@ -38,15 +38,14 @@ class AvoidObstTurtleBot:
            # setup
         self.diameter = diameter
         self.distance_tolerance = distance_tolrance
-        self.front_dis_ang_samples = [0]
+        
         sample_angle = math.ceil(math.degrees(math.atan(self.diameter / self.distance_tolerance)))
-        self.front_dis_ang_samples = [0, *range(1, sample_angle + 1), *range(-1, -sample_angle - 1, -1)]
+        self.ang_samples = [0, *range(1, sample_angle + 1), *range(-1, -sample_angle - 1, -1)]
 
         # subscribed
         self.x, self.y  = None, None
         self.distance_at_angle = [0] * 360
         self.roll, self.pitch, self.yaw = None, None, None
-        self.front_dis = None
         self.cur_twist = None
         self.heading = None
         self.last_valid_heading = None
@@ -116,17 +115,23 @@ class AvoidObstTurtleBot:
             return False # assuming no movement, no hitting
 
         v0, delta_theta = self.cur_twist.linear.x, self.cur_twist.angular.z
-        angle_resolutions = range(0, 360, 1)
-        xs_far = [self.distance_at_angle[i] * math.cos(math.radians(i)) for i in angle_resolutions]
-        ys_far = [self.distance_at_angle[i] * math.sin(math.radians(i)) for i in angle_resolutions]
+    
         for timestamp in foresight_timestamps:
-
             if delta_theta != 0:
                 x = v0 * math.cos(0) / delta_theta - v0 * math.cos(delta_theta * timestamp) / delta_theta
                 y = v0 * math.sin(delta_theta * timestamp) / delta_theta
             else:
                 x = 0
                 y = v0 * timestamp
+
+
+            degree_stdize = lambda x: (x + 360) % 360
+            theta = (round(math.degrees(math.atan2(y, x))) + 360) % 360 # standardize the degree from 0 to 359
+            
+            # only check angles around the distance since we are moving there 
+            _sample_angles = [degree_stdize(i + theta) for i in self.ang_samples]
+            xs_far = [self.distance_at_angle[i] * math.cos(math.radians(i)) for i in _sample_angles]
+            ys_far = [self.distance_at_angle[i] * math.sin(math.radians(i)) for i in _sample_angles]
 
             for x1, y1 in zip(xs_far, ys_far):
                 d = findDistance(x, y, x1, y1)
@@ -135,8 +140,8 @@ class AvoidObstTurtleBot:
                     return True
         return False
 
-    def foresight_twist():
-        return Twist
+    def foresight_twist(self):
+        return Twist()
 
 if __name__ == '__main__':
 
@@ -174,7 +179,7 @@ if __name__ == '__main__':
                 theta_tolerance=theta_tolerance,
                 follow_distance=follow_distance)
         print(msg)
-        # pub.publish(msg)
+        pub.publish(msg)
         rate.sleep()
 
     rospy.spin()
