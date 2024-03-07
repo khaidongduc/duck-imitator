@@ -26,7 +26,7 @@ from std_msgs.msg import Float32MultiArray
 diameter = 0.07 # m
 theta_tolerance = 0.2 # rad
 linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-safe_distance = 0.2 # m
+safe_distance = 0.3 # m
 follow_distance = 0.5 # m
 
 
@@ -87,11 +87,11 @@ class AvoidObstTurtleBot:
             # wait for the robot in the front to move away
 
         if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
-            out_msg.angular.z = max_ang_spd / 2
+            out_msg.angular.z = max_ang_spd
             if self.last_valid_heading is not None:
                 last_theta = self.last_valid_heading.data[1]
                 # print("last_theta:", last_theta)
-                out_msg.angular.z *= - last_theta / abs(last_theta)
+                out_msg.angular.z *= last_theta / abs(last_theta)
             return out_msg
 
         theta = self.heading.data[1]
