@@ -135,6 +135,9 @@ class AvoidObstTurtleBot:
                     return True
         return False
 
+    def foresight_twist():
+        return Twist
+
 if __name__ == '__main__':
 
     # setup
@@ -165,7 +168,7 @@ if __name__ == '__main__':
         about_to_hit = rob.foresight_obtacles(foresight_timestamps=foresight_timestamps)
         print(about_to_hit)
         if about_to_hit:
-            msg = Twist()
+            msg = rob.foresight_twist()
         else:
             msg = rob.create_adjusted_twist(
                 theta_tolerance=theta_tolerance,
