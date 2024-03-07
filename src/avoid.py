@@ -20,6 +20,8 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Float32MultiArray
+from utils import findDistance
+import numpy as np
 
 
 # constant
@@ -28,6 +30,7 @@ theta_tolerance = 0.2 # rad
 linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
 safe_distance = 0.3 # m
 follow_distance = 0.5 # m
+foresight_timestamps = np.arange(0, 0.5, 0.1) #s
 
 
 class AvoidObstTurtleBot:
@@ -58,13 +61,9 @@ class AvoidObstTurtleBot:
         self.init_odom = True
 
     def laser_update(self, laser_read):
-        print("Laser Update")
         angles = range(0, 360, 1)
         for angle in angles:
             self.distance_at_angle[angle] = float("inf") if laser_read.ranges[angle] == 0 else  laser_read.ranges[angle]
-    
-        self.front_dis = min(self.distance_at_angle[angle] * math.cos(math.radians(abs(angle))) 
-                             for angle in self.front_dis_ang_samples)
         self.init_laser = True
 
     def twist_update(self, twist_msg):
@@ -81,10 +80,6 @@ class AvoidObstTurtleBot:
             max_lin_speed=0.3, max_ang_spd=math.radians(30)):
         
         out_msg = Twist()
-
-        if self.front_dis is None or self.front_dis < self.distance_tolerance:
-            return out_msg # assume the only obstacles of the robots are themselves
-            # wait for the robot in the front to move away
 
         if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
             out_msg.angular.z = max_ang_spd
@@ -116,6 +111,30 @@ class AvoidObstTurtleBot:
     
         return out_msg
 
+    def foresight_obtacles(self, foresight_timestamps):
+        if self.cur_twist is None:
+            return False # assuming no movement, no hitting
+
+        v0, delta_theta = self.cur_twist.linear.x, self.cur_twist.angular.z
+        angle_resolutions = range(0, 360, 1)
+        xs_far = [self.distance_at_angle[i] * math.cos(math.radians(i)) for i in angle_resolutions]
+        ys_far = [self.distance_at_angle[i] * math.sin(math.radians(i)) for i in angle_resolutions]
+        for timestamp in foresight_timestamps:
+
+            if delta_theta != 0:
+                x = v0 * math.cos(0) / delta_theta - v0 * math.cos(delta_theta * timestamp) / delta_theta
+                y = v0 * math.sin(delta_theta * timestamp) / delta_theta
+            else:
+                x = 0
+                y = v0 * timestamp
+
+            for x1, y1 in zip(xs_far, ys_far):
+                d = findDistance(x, y, x1, y1)
+                # print("Distance:", d) 
+                if d <= self.distance_tolerance:
+                    return True
+        return False
+
 if __name__ == '__main__':
 
     # setup
@@ -127,7 +146,7 @@ if __name__ == '__main__':
     # rospy.Subscriber("/odom", Odometry, rob.odom_update)
     rospy.Subscriber("/scan", LaserScan, rob.laser_update)   
 
-    # rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
+    rospy.Subscriber("/cmd_vel", Twist, rob.twist_update) # to slowly ease out from current speed for smoother   
     rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
 
 
@@ -143,11 +162,16 @@ if __name__ == '__main__':
     rate = rospy.Rate(10)
     pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
     while not rospy.is_shutdown():
-        msg = rob.create_adjusted_twist(
-            theta_tolerance=theta_tolerance,
-            follow_distance=follow_distance)
+        about_to_hit = rob.foresight_obtacles(foresight_timestamps=foresight_timestamps)
+        print(about_to_hit)
+        if about_to_hit:
+            msg = Twist()
+        else:
+            msg = rob.create_adjusted_twist(
+                theta_tolerance=theta_tolerance,
+                follow_distance=follow_distance)
         print(msg)
-        pub.publish(msg)
+        # pub.publish(msg)
         rate.sleep()
 
     rospy.spin()

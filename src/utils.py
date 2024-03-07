@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 import numpy as np
 import cv2
 
@@ -25,3 +26,6 @@ def get_limits(color):
 
 def findArea(x1, x2, y1, y2):
     return (x2 - x1) * (y2 - y1)
+
+def findDistance(x1, y1, x2, y2):
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
