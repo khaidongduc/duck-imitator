@@ -1,5 +1,7 @@
 <launch>
   
+  <rosparam command="load" file="$(find duck_imitator)/config/config.yaml" />
+
   <node
     pkg="duck_imitator"
     type="yellow_detector.py"

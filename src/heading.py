@@ -14,10 +14,16 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
+from utils import findDistance
+
+img_num_rows = rospy.get_param("img_num_rows")
+img_num_cols = rospy.get_param("img_num_cols")
+alpha = rospy.get_param("alpha")
+beta = rospy.get_param("beta")
+
 
 class Follow:
     def __init__(self):
-        #self.point_sub = rospy.Subscriber("point_topic", Polygon, self.follow_callback)
         self.x1 = 0
         self.y1 = 0
         self.z1 = 0
@@ -30,7 +36,7 @@ class Follow:
         self.theta_angle = 0
 
         self.follow_array = []
-        #self.follow_pub = rospy.Publisher("follow_topic", Float32MultiArray, queue_size=10)
+        
     def follow_callback(self, data):
 
         if len(data.points) == 0:
@@ -49,16 +55,13 @@ class Follow:
         self.y2 = data.points[1].y
         self.z2 = data.points[1].z
 
-        img_num_rows = 240
-        img_num_cols = 320
-
         img_mid_point = (img_num_cols / 2, img_num_rows / 2)
-        obj_mid_point = ((self.x1 + self.x2)/2, (self.y1 + self.y2)/2)
-        img_obj_distance = findDistance(obj_mid_point, img_mid_point)
+        obj_mid_point = ((self.x1 + self.x2) / 2, (self.y1 + self.y2) / 2)
+        img_obj_distance = findDistance(*obj_mid_point, *img_mid_point)
 
         area = findArea(self.x1, self.x2, self.y1, self.y2)
 
-        camera_distance = 111 - math.sqrt(area)/0.63
+        camera_distance = 111 - math.sqrt(area) / 0.63
 
         self.distance = camera_distance / 2
         self.theta_angle = math.atan2(img_obj_distance, camera_distance)
@@ -74,13 +77,6 @@ class Follow:
         self.follow_array.append(self.theta_angle)
         # print("Array", self.follow_array)
     
-def findDistance(this_point,another_point):
-    x0 = this_point[0]
-    x1 = another_point[0]
-    y0 = this_point[1]
-    y1 = another_point[1]
-    newDistance = math.sqrt((x1-x0)**2 + (y1-y0)**2)
-    return newDistance
 
 if __name__ == '__main__':
     rob = Follow()

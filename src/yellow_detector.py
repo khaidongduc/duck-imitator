@@ -15,7 +15,7 @@ from geometry_msgs.msg import Polygon, Point32
 from utils import get_limits, findArea
 
 
-THRES = 0
+THRES = rospy.get_param("THRES") 
 
 class image_converter:
 
@@ -59,7 +59,8 @@ class image_converter:
                 bbox = None
                 self.point_pub.publish(Polygon())
             else:
-                cv_image = cv2.rectangle(cv_image, (x1, y1), (x2, y2), (0, 255, 0), 5)
+                line_width = 5
+                cv_image = cv2.rectangle(cv_image, (x1, y1), (x2, y2), (0, 255, 0), line_width)
                 points = Polygon()
                 points.points.append(Point32(x=x1, y=y1, z=0))
                 points.points.append(Point32(x=x2, y=y2, z=0))

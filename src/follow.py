@@ -25,10 +25,13 @@ import numpy as np
 import os
 
 # constant
-theta_tolerance = 0.2 # rad
-linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-follow_distance = 0.5 # m
+theta_tolerance = rospy.get_param("theta_tolerance") # rad
+linear_spd = rospy.get_param("linear_spd") # m/s, 
+angular_speed = math.radians(rospy.get_param("angular_speed")) # rad/s
+follow_distance = rospy.get_param("follow_distance") # m
 
+# print(theta_tolerance, linear_spd, angular_speed, follow_distance)
+# print(type(theta_tolerance))
 
 class FollowBot:
     def __init__(self, follow_tolerance):
@@ -93,13 +96,13 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
 
-        # os.system('clear')
-        # print("follow ===================================================")
-        # print("(d, theta)", rob.heading)
+        os.system('clear')
+        print("follow ===================================================")
+        print("(d, theta)", rob.heading)
         
         
-        # print(msg)
-        # print("==========================================================")
+        print(msg)
+        print("==========================================================")
 
         pub.publish(msg)
         rate.sleep()

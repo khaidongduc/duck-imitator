@@ -6,6 +6,9 @@ import cv2
 
 
 def get_limits(color):
+    '''
+    Convert BGR color to HSV to get the limit range for a given color in the BGR cylinder
+    '''
     c = np.uint8([[color]])  # BGR values
     hsvC = cv2.cvtColor(c, cv2.COLOR_BGR2HSV)
 

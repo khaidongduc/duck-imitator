@@ -27,10 +27,10 @@ from copy import deepcopy
 
 
 # constant
-diameter = 0.07 # m
-distance_tolerance = 0.2 # m
-foresight_timestamps = np.arange(0.0, 0.8, 0.2)
-sample_angle = 5 
+diameter = rospy.get_param("diameter") # m
+distance_tolerance = rospy.get_param("distance_tolerance") # m
+foresight_timestamps = rospy.get_param("foresight_timestamps") # [<seconds>, <seconds>]
+sample_angle = rospy.get_param("sample_angle") # degree
 
 class AvoidBot:
     def __init__(self, diameter, distance_tolrance, foresight_timestamps):
