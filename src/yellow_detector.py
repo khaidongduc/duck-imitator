@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# ROS Noetic
+# Node Name: yellow_detector
+# Subscribed Topics: /camera/image
+# Published Topics: /image_topic, /point_topic
+#  
+# Given an image from topic /camera/image
+# process the image to find the hull of a "yellow" square in that image
+# what exactly yellow is can be specified in the config file
+# publish the hull of the "yellow" square to /point_topic
+# /image_topic is used for ROS Bridge to convert ROS message to OpenCV message
 
 from __future__ import print_function
 import roslib
@@ -19,11 +29,11 @@ THRES = rospy.get_param("THRES")
 YELLOW = rospy.get_param("YELLOW")
 HUE_LIMIT = rospy.get_param("HUE_LIMIT")
 
-class image_converter:
+class DetectBot:
 
     def __init__(self):
-        self.image_pub = rospy.Publisher("image_topic", ImageMsg, queue_size=10)
-        self.point_pub = rospy.Publisher("point_topic", Polygon, queue_size=10)
+        self.image_pub = rospy.Publisher("/image_topic", ImageMsg, queue_size=10)
+        self.point_pub = rospy.Publisher("/point_topic", Polygon, queue_size=10)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber("/camera/image", ImageMsg, self.callback)
 
@@ -34,29 +44,22 @@ class image_converter:
         except CvBridgeError as e:
             print(e)
         (rows,cols,channels) = cv_image.shape
-        # print("Number of rows", rows)
-        # print("Number of columns", cols)
 
-        # Yellow color detection
-          # yellow in BGR colorspace
 
+        # "Yellow" color detection
+        # "yellow" in BGR colorspace
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         lowerLimit, upperLimit = get_limits(color=YELLOW, huelimit=HUE_LIMIT)
         color_mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
         mask = color_mask
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
- 
 
-       
+        # find bbox in image
         mask_ = Img.fromarray(mask)
- 
         bbox = mask_.getbbox()
-        
-
         if bbox is not None:
             x1, y1, x2, y2 = bbox
-        
             area = findArea(x1, x2, y1, y2)
             if area < THRES * rows * cols:
                 bbox = None
@@ -69,17 +72,12 @@ class image_converter:
                 points.points.append(Point32(x=x2, y=y2, z=0))
                 points.points.append(Point32(x=x1, y=y2, z=0))
                 points.points.append(Point32(x=x2, y=y1, z=0))
-
                 self.point_pub.publish(points)
-
-                # print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
-                # print("Area", (x2-x1)*(y2-y1))
         else:
             self.point_pub.publish(Polygon())
-        #contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 
-        
+        # Show object hull for visual check
         cv2.imshow("Image window", cv_image)
         cv2.imshow("Color Image window", color_mask)
         cv2.waitKey(3)
@@ -91,8 +89,8 @@ class image_converter:
             print(e)
 
 def main(args):
-    ic = image_converter()
-    rospy.init_node('image_converter', anonymous=True)
+    ic = DetectBot()
+    rospy.init_node('yellow_detector', anonymous=True)
     try:
         rospy.spin()
     except KeyboardInterrupt:

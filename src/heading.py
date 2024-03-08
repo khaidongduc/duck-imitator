@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# ROS Noetic
+# Node Name: heading
+# Subscribed Topics: /point_topic
+# Published Topics: /heading_topic
+#  
+# Heading node so the baby duck can determine 
+# the distance and orientation of the mama duck, subscribed to point_topic, publish to /heading_topic
 
 from __future__ import print_function
 import roslib
@@ -22,7 +29,7 @@ ALPHA = rospy.get_param("ALPHA")
 BETA = rospy.get_param("BETA")
 
 
-class Follow:
+class HeadingBot:
     def __init__(self):
         self.x1 = 0
         self.y1 = 0
@@ -69,20 +76,17 @@ class Follow:
         if obj_mid_point[0] - img_mid_point[0] < 0:
             self.theta_angle = -self.theta_angle
 
-        # print("Distance", self.distance)
-        # print("Theta angle", self.theta_angle)
-
         self.follow_array = []
         self.follow_array.append(self.distance)
         self.follow_array.append(self.theta_angle)
-        # print("Array", self.follow_array)
+
     
 
 if __name__ == '__main__':
-    rob = Follow()
+    rob = HeadingBot()
     rospy.init_node('heading', anonymous=True)
 
-    rospy.Subscriber("point_topic", Polygon, rob.follow_callback)
+    rospy.Subscriber("/point_topic", Polygon, rob.follow_callback)
     rate = rospy.Rate(10)
 
     pub = rospy.Publisher("/heading_topic", Float32MultiArray, queue_size=10)

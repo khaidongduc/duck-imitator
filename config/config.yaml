@@ -1,24 +1,25 @@
-
-
 # YELLOW_DETECTOR
-THRES: 0.01
-YELLOW: [0, 255, 255]
-HUE_LIMIT: 10
+THRES: 0.01                                 # threshold to indicate the percentage of yellow_square that the baby duck can detect           
+YELLOW: [0, 255, 255]                       # yellow color in RGB
+HUE_LIMIT: 10                               # limit to the hue 
 
 # HEADING
-IMG_NUM_ROWS: 240
-IMG_NUM_COLS: 320
-ALPHA: 0.63
-BETA: 111
+IMG_NUM_ROWS: 240                           # number of rows in the camera image
+IMG_NUM_COLS: 320                           # number of columns in the camera image
+
+ALPHA: 0.63                                 # Linear equation to determine the distance between the baby duck and mama duck
+BETA: 111                                   # sqrt(yellow_square_area) = ALPHA * distance + BETA
 
 # FOLLOW
-THETA_TOLERANCE: 0.2 # RAD
-LINEAR_SPEED: 0.2 # M/S
-ANGULAR_SPEED: 30 # DEGREE/S
-FOLLOW_DISTANCE: 0.5 # M
+THETA_TOLERANCE: 0.2 # RAD                  # only rotate of the orientation of the robot if the orientation is more than tolerance
+LINEAR_SPEED: 0.2 # M/S                     # maximum linear speed, the script will reduce the speed to such if larger speed is given
+ANGULAR_SPEED: 30 # DEGREE/S                # maximum angular speed, the script will reduce the speed to such if larger speed is given
+FOLLOW_DISTANCE: 0.5 # M                    # maintain this distance from the targer
 
 # AVOID
-DIAMETER: 0.07 # M
-DISTANCE_TOLERANCE: 0.2 # M
-FORESIGHT_TIMESTAMPS: [0.0, 0.2, 0.4, 0.6]
-SAMPLE_ANGLE: 5
+DIAMETER: 0.07			                        # the diameter of the robot, in meter
+DISTANCE_TOLERANCE: 0.2		                  # the safe distance, the robot is going to stop if it is going to go near
+					                                  # and obstacles this much, in meter
+FORESIGHT_TIMESTAMPS: [0.0, 0.2, 0.4, 0.6]  # try to forsights there times forward, in second
+				                                    # how much neighour angles to sample aside from the closest angle 
+SAMPLE_ANGLE: 5						                  # towards the moving direction, in degree

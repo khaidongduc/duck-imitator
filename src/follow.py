@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# Edited by Khai Dong (dongk@union.edu)
-
-# behavior description:
-# the robot will move forward if there is no obstacles 0.5m ahead
-# since the robot is not a single point, aside from 0 degree right ahead, the robot also samples
-# some ajacent angles to see if its sides may hit an object
-# if there are objects are head, the robot will choose the angle with the most free space
-# and turn to that angle
-# the angle choice has the same mechanism as it will samples nearby angles
-# there is some trignometry involved to figured how much ajacent angles to be sampled
-# in rotating, I use the odometry data instead of timing for a more accurate turn
-#               moreover, I slow the robot down as it is approaching the desired location
-
+# ROS Noetic
+# Node Name: follow
+# Subscribed Topics: /heading_topic
+# Published Topics: /mv_cmd
+#  
+# Given a heading (a distance and a orientation)
+# generate a smooth movement toward the heading
+# - certain scalings and smoothing kinematics are involved
+# How the robot is going to determine this is through the defined constants
+# see config/config.yaml to see what parameters are expected
 
 
 import rospy, math

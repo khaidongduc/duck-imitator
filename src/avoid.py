@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
-# Edited by Khai Dong (dongk@union.edu)
-
-# behavior description:
-# the robot will move forward if there is no obstacles 0.5m ahead
-# since the robot is not a single point, aside from 0 degree right ahead, the robot also samples
-# some ajacent angles to see if its sides may hit an object
-# if there are objects are head, the robot will choose the angle with the most free space
-# and turn to that angle
-# the angle choice has the same mechanism as it will samples nearby angles
-# there is some trignometry involved to figured how much ajacent angles to be sampled
-# in rotating, I use the odometry data instead of timing for a more accurate turn
-#               moreover, I slow the robot down as it is approaching the desired location
-
+# ROS Noetic
+# Node Name: avoid
+# Subscribed Topics: /scan, /mv_cmd
+# Published Topics: /cmd_vel
+#  
+# Given a Twist from topic /mv_cmd and laser scan from /scan
+# remove the linear velocity if the robot is going to hit some obstacles
+# some times after this instant
+# How the robot is going to determine this is through the defined constants and laser scan
+# see config/config.yaml to see what parameters are expected
 
 
 import rospy, math
@@ -101,7 +98,6 @@ class AvoidBot:
                     # print(f"Forsighted Location:", (x, y))
                     # print(f"Obstacles Location:", (x1, y1))
                     # print("==================================")  
-
                     return True
         return False
 
