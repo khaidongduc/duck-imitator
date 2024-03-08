@@ -44,7 +44,7 @@ class FollowBot:
 
     def create_adjusted_twist(self,
             theta_tolerance = 0.2, # rad 
-            max_lin_speed=0.3, max_ang_spd=math.radians(30)):
+            max_lin_speed=0.2, max_ang_spd=math.radians(20)):
         
         out_msg = Twist()
 
