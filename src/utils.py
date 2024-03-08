@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 
 
-def get_limits(color):
+def get_limits(color, huelimit):
     '''
     Convert BGR color to HSV to get the limit range for a given color in the BGR cylinder
     '''
@@ -16,14 +16,14 @@ def get_limits(color):
 
     # Handle red hue wrap-around
     if hue >= 165:  # Upper limit for divided red hue
-        lowerLimit = np.array([hue - 10, 100, 100], dtype=np.uint8)
+        lowerLimit = np.array([hue - huelimit, 100, 100], dtype=np.uint8)
         upperLimit = np.array([180, 255, 255], dtype=np.uint8)
     elif hue <= 15:  # Lower limit for divided red hue
         lowerLimit = np.array([0, 100, 100], dtype=np.uint8)
-        upperLimit = np.array([hue + 10, 255, 255], dtype=np.uint8)
+        upperLimit = np.array([hue + huelimit, 255, 255], dtype=np.uint8)
     else:
-        lowerLimit = np.array([hue - 10, 100, 100], dtype=np.uint8)
-        upperLimit = np.array([hue + 10, 255, 255], dtype=np.uint8)
+        lowerLimit = np.array([hue - huelimit, 100, 100], dtype=np.uint8)
+        upperLimit = np.array([hue + huelimit, 255, 255], dtype=np.uint8)
 
     return lowerLimit, upperLimit
 

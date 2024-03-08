@@ -16,6 +16,8 @@ from utils import get_limits, findArea
 
 
 THRES = rospy.get_param("THRES") 
+YELLOW = rospy.get_param("YELLOW")
+HUE_LIMIT = rospy.get_param("HUE_LIMIT")
 
 class image_converter:
 
@@ -36,11 +38,12 @@ class image_converter:
         # print("Number of columns", cols)
 
         # Yellow color detection
-        yellow = [0, 255, 255]  # yellow in BGR colorspace
+          # yellow in BGR colorspace
 
         hsvImage = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        lowerLimit, upperLimit = get_limits(color=yellow)
-        mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
+        lowerLimit, upperLimit = get_limits(color=YELLOW, huelimit=HUE_LIMIT)
+        color_mask = cv2.inRange(hsvImage, lowerLimit, upperLimit)
+        mask = color_mask
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
  
@@ -78,7 +81,7 @@ class image_converter:
 
         
         cv2.imshow("Image window", cv_image)
-
+        cv2.imshow("Color Image window", color_mask)
         cv2.waitKey(3)
 
         # Convert OpenCV image back to ROS image message if you need to publish it

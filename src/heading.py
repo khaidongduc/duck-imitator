@@ -85,7 +85,7 @@ if __name__ == '__main__':
     rospy.Subscriber("point_topic", Polygon, rob.follow_callback)
     rate = rospy.Rate(10)
 
-    pub = rospy.Publisher("/heading", Float32MultiArray, queue_size=10)
+    pub = rospy.Publisher("/heading_topic", Float32MultiArray, queue_size=10)
     while not rospy.is_shutdown():
         data_to_send = Float32MultiArray()
         data_to_send.data = rob.follow_array # assign the array with the value you want to send

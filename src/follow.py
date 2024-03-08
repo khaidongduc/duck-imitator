@@ -50,11 +50,11 @@ class FollowBot:
         out_msg = Twist()
 
         if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
-            # out_msg.angular.z = max_ang_spd
-            # if self.last_valid_heading is not None:
-            #     last_theta = self.last_valid_heading.data[1]
-            #     # print("last_theta:", last_theta)
-            #     out_msg.angular.z *= last_theta / abs(last_theta)
+            out_msg.angular.z = max_ang_spd
+            if self.last_valid_heading is not None:
+                last_theta = self.last_valid_heading.data[1]
+                # print("last_theta:", last_theta)
+                out_msg.angular.z *= last_theta / abs(last_theta)
             return out_msg
 
         theta = self.heading.data[1]
@@ -72,7 +72,7 @@ class FollowBot:
             # make sure angular speed don't exceed max
             if abs(out_msg.angular.z) >= max_ang_spd:
                 out_msg.angular.z = out_msg.angular.z / abs(out_msg.angular.z) * max_ang_spd
-        if d > follow_distance:
+        if d > self.follow_tolerance:
             out_msg.linear.x = max(max_lin_speed, lin_spd_control * d * max_lin_speed)
             # return out_msg
 
@@ -88,18 +88,16 @@ if __name__ == '__main__':
     rob = FollowBot()
     rospy.init_node('follow', anonymous=True)
 
-    rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
+    rospy.Subscriber("/heading_topic", Float32MultiArray, rob.heading_update) # to know the desired heading
 
     rate = rospy.Rate(10)
     pub = rospy.Publisher("/mv_cmd", Twist, queue_size=10)
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist()
 
-        os.system('clear')
+        # os.system('clear')
         print("follow ===================================================")
         print("(d, theta)", rob.heading)
-        
-        
         print(msg)
         print("==========================================================")
 
