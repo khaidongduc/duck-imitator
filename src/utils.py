@@ -32,3 +32,5 @@ def findArea(x1, x2, y1, y2):
 
 def findDistance(x1, y1, x2, y2):
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+degree_stdize = lambda x: (x + 360) % 360

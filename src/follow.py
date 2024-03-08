@@ -25,16 +25,14 @@ import numpy as np
 import os
 
 # constant
-theta_tolerance = rospy.get_param("theta_tolerance") # rad
-linear_spd = rospy.get_param("linear_spd") # m/s, 
-angular_speed = math.radians(rospy.get_param("angular_speed")) # rad/s
-follow_distance = rospy.get_param("follow_distance") # m
+THETA_TOLERANCE = rospy.get_param("THETA_TOLERANCE") # rad
+LINEAR_SPEED = rospy.get_param("LINEAR_SPEED") # m/s, 
+ANGULAR_SPEED = math.radians(rospy.get_param("ANGULAR_SPEED")) # rad/s
+FOLLOW_DISTANCE = rospy.get_param("FOLLOW_DISTANCE") # m
 
-# print(theta_tolerance, linear_spd, angular_speed, follow_distance)
-# print(type(theta_tolerance))
 
 class FollowBot:
-    def __init__(self, follow_tolerance):
+    def __init__(self, follow_tolerance=FOLLOW_DISTANCE):
         self.follow_tolerance = follow_tolerance
         self.heading = None
         self.last_valid_heading = None
@@ -46,8 +44,8 @@ class FollowBot:
             self.last_valid_heading = heading_msg
 
     def create_adjusted_twist(self,
-            theta_tolerance = 0.2, # rad 
-            max_lin_speed=0.2, max_ang_spd=math.radians(20)):
+            theta_tolerance=THETA_TOLERANCE, # rad 
+            max_lin_speed=LINEAR_SPEED, max_ang_spd=ANGULAR_SPEED):
         
         out_msg = Twist()
 
@@ -83,10 +81,11 @@ class FollowBot:
         
         return out_msg
 
+
 if __name__ == '__main__':
 
     # setup
-    rob = FollowBot(follow_distance)
+    rob = FollowBot()
     rospy.init_node('follow', anonymous=True)
 
     rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
@@ -94,7 +93,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(10)
     pub = rospy.Publisher("/mv_cmd", Twist, queue_size=10)
     while not rospy.is_shutdown():
-        msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
+        msg = rob.create_adjusted_twist()
 
         os.system('clear')
         print("follow ===================================================")

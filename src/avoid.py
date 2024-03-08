@@ -20,20 +20,24 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Float32MultiArray
-from utils import findDistance
+from utils import findDistance, degree_stdize
 import numpy as np
 from copy import deepcopy 
 
 
 
 # constant
-diameter = rospy.get_param("diameter") # m
-distance_tolerance = rospy.get_param("distance_tolerance") # m
-foresight_timestamps = rospy.get_param("foresight_timestamps") # [<seconds>, <seconds>]
-sample_angle = rospy.get_param("sample_angle") # degree
+DIAMETER = rospy.get_param("DIAMETER") # m
+DISTANCE_TOLERANCE = rospy.get_param("DISTANCE_TOLERANCE") # m
+FORESIGHT_TIMESTAMPS = rospy.get_param("FORESIGHT_TIMESTAMPS") # [<seconds>, <seconds>]
+SAMPLE_ANGLE = rospy.get_param("SAMPLE_ANGLE") # degree
 
 class AvoidBot:
-    def __init__(self, diameter, distance_tolrance, foresight_timestamps):
+    def __init__(self, 
+            diameter=DIAMETER, 
+            distance_tolrance=DISTANCE_TOLERANCE, 
+            foresight_timestamps=FORESIGHT_TIMESTAMPS, 
+            sample_angle=SAMPLE_ANGLE):
         # setup
         self.diameter = diameter
         self.distance_tolerance = distance_tolrance
@@ -57,7 +61,7 @@ class AvoidBot:
 
     def mv_cmd_twist_update(self, twist_msg):
         self.mv_cmd_twist = twist_msg # reactive of follow
-        self.pub.publish(self.foresight_twist(foresight_timestamps))
+        self.pub.publish(self.foresight_twist(self.foresight_timestamps))
 
 
     def foresight_obtacles(self, foresight_timestamps):
@@ -73,8 +77,8 @@ class AvoidBot:
                 x = 0
                 y = v0 * timestamp
 
-            degree_stdize = lambda x: (x + 360) % 360
-            theta = (round(math.degrees(math.atan2(y, x))) + 360) % 360 # standardize the degree from 0 to 359
+            
+            theta = degree_stdize(round(math.degrees(math.atan2(y, x)))) # standardize the degree from 0 to 359
             
             # only check angles around the distance since we are moving there 
             _sample_angles = [degree_stdize(i + theta) for i in self.ang_samples]
@@ -115,16 +119,14 @@ class AvoidBot:
             res.linear.x = 0
             res.linear.y = 0
             res.linear.z = 0
-
-        print("====================================")
-        print(res)
-        print("====================================")     
+ 
         return res
+
 
 if __name__ == '__main__':
 
     # setup
-    rob = AvoidBot(diameter, distance_tolerance, foresight_timestamps)
+    rob = AvoidBot()
     rospy.init_node('avoid', anonymous=True)
 
 
