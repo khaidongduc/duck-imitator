@@ -35,11 +35,11 @@ class Follow:
 
         if len(data.points) == 0:
             self.follow_array = []
-            print("Distance", None)
-            print("Theta angle", None)
+            # print("Distance", None)
+            # print("Theta angle", None)
             return self.follow_array
 
-        print(data.points)
+        # print(data.points)
 
         self.x1 = data.points[0].x
         self.y1 = data.points[0].y

@@ -22,7 +22,7 @@ from tf.transformations import euler_from_quaternion
 from std_msgs.msg import Float32MultiArray
 from utils import findDistance
 import numpy as np
-
+import os
 
 # constant
 theta_tolerance = 0.2 # rad
@@ -93,6 +93,7 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
 
+        os.system('clear')
         print("follow ===================================================")
         print("(d, theta)", rob.heading)
         print(msg)

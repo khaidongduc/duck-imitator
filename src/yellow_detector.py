@@ -68,8 +68,8 @@ class image_converter:
 
                 self.point_pub.publish(points)
 
-                print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
-                print("Area", (x2-x1)*(y2-y1))
+                # print(f"Published points: [({x1}, {y1}), ({x2}, {y2}), ({x1}, {y2}), ({x2}, {y1})]")
+                # print("Area", (x2-x1)*(y2-y1))
         else:
             self.point_pub.publish(Polygon())
         #contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
