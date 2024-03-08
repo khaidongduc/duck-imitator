@@ -18,6 +18,14 @@
 
   <node
     pkg="duck_imitator"
+    type="follow.py"
+    name="follow"
+    output="screen"
+    respawn="true"
+  />
+
+  <node
+    pkg="duck_imitator"
     type="avoid.py"
     name="avoid"
     output="screen"

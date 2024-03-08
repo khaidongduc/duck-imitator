@@ -31,7 +31,7 @@ follow_distance = 0.5 # m
 
 
 class FollowBot:
-    def __init__(self, diameter, follow_tolerance):
+    def __init__(self, follow_tolerance):
         self.follow_tolerance = follow_tolerance
         self.heading = None
         self.last_valid_heading = None
@@ -80,7 +80,7 @@ class FollowBot:
 if __name__ == '__main__':
 
     # setup
-    rob = FollowBot(diameter, safe_distance)
+    rob = FollowBot(follow_distance)
     rospy.init_node('follow', anonymous=True)
 
     rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
