@@ -93,13 +93,13 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
 
-        os.system('clear')
-        print("follow ===================================================")
-        print("(d, theta)", rob.heading)
+        # os.system('clear')
+        # print("follow ===================================================")
+        # print("(d, theta)", rob.heading)
         
         
-        print(msg)
-        print("==========================================================")
+        # print(msg)
+        # print("==========================================================")
 
         pub.publish(msg)
         rate.sleep()
