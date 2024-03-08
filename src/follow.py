@@ -49,11 +49,11 @@ class FollowBot:
         out_msg = Twist()
 
         if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
-            out_msg.angular.z = max_ang_spd
-            if self.last_valid_heading is not None:
-                last_theta = self.last_valid_heading.data[1]
-                # print("last_theta:", last_theta)
-                out_msg.angular.z *= last_theta / abs(last_theta)
+            # out_msg.angular.z = max_ang_spd
+            # if self.last_valid_heading is not None:
+            #     last_theta = self.last_valid_heading.data[1]
+            #     # print("last_theta:", last_theta)
+            #     out_msg.angular.z *= last_theta / abs(last_theta)
             return out_msg
 
         theta = self.heading.data[1]
@@ -75,8 +75,8 @@ class FollowBot:
             out_msg.linear.x = max(max_lin_speed, lin_spd_control * d * max_lin_speed)
             # return out_msg
 
-        # # insert spinning direction in case of inverted camera
-        # out_msg.angular.z = - out_msg.angular.z 
+        # insert spinning direction in case of inverted camera
+        out_msg.angular.z = - out_msg.angular.z 
         
         return out_msg
 
@@ -96,6 +96,8 @@ if __name__ == '__main__':
         os.system('clear')
         print("follow ===================================================")
         print("(d, theta)", rob.heading)
+        
+        
         print(msg)
         print("==========================================================")
 

@@ -108,7 +108,7 @@ class AvoidBot:
 
         res = deepcopy(self.mv_cmd_twist)
         
-        if self.foresight_obtacles(foresight_timestamps):
+        if self.foresight_obtacles(foresight_timestamps) or True:
             # remove all linear speed to avoid hitting things
             # still turns towards the target if possible
             # if the laser is covered, it is likely that the camera is covered as well

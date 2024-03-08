@@ -63,6 +63,9 @@ class Follow:
         self.distance = camera_distance / 2
         self.theta_angle = math.atan2(img_obj_distance, camera_distance)
 
+        if obj_mid_point[0] - img_mid_point[0] < 0:
+            self.theta_angle = -self.theta_angle
+
         # print("Distance", self.distance)
         # print("Theta angle", self.theta_angle)
 
