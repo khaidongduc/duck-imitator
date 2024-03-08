@@ -25,23 +25,14 @@ import numpy as np
 
 
 # constant
-diameter = 0.07 # m
 theta_tolerance = 0.2 # rad
 linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
-safe_distance = 0.3 # m
 follow_distance = 0.5 # m
-foresight_timestamps = np.arange(0, 0.5, 0.1) #s
 
 
 class FollowBot:
     def __init__(self, diameter, follow_tolerance):
-
         self.follow_tolerance = follow_tolerance
-
-        # subscribed
-        self.distance_at_angle = [0] * 360
-        self.init_laser = False
-    
         self.heading = None
         self.last_valid_heading = None
 
@@ -97,9 +88,7 @@ if __name__ == '__main__':
     rate = rospy.Rate(10)
     pub = rospy.Publisher("/mv_cmd", Twist, queue_size=10)
     while not rospy.is_shutdown():
-        msg = rob.create_adjusted_twist(
-            theta_tolerance=theta_tolerance,
-            follow_distance=follow_distance)
+        msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
         pub.publish(msg)
         rate.sleep()
 
