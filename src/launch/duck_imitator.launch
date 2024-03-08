@@ -10,8 +10,8 @@
   
   <node
     pkg="duck_imitator"
-    type="follow.py"
-    name="follow"
+    type="heading.py"
+    name="heading"
     output="screen"
     respawn="true"
   />

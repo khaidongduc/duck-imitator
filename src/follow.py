@@ -1,103 +1,106 @@
 #!/usr/bin/env python3
+# Edited by Khai Dong (dongk@union.edu)
 
-from __future__ import print_function
-import roslib
-import numpy as np
-import sys
-from std_msgs.msg import String, Float32MultiArray
-from sensor_msgs.msg import Image as ImageMsg
-from geometry_msgs.msg import Polygon, Point32, PoseArray
+# behavior description:
+# the robot will move forward if there is no obstacles 0.5m ahead
+# since the robot is not a single point, aside from 0 degree right ahead, the robot also samples
+# some ajacent angles to see if its sides may hit an object
+# if there are objects are head, the robot will choose the angle with the most free space
+# and turn to that angle
+# the angle choice has the same mechanism as it will samples nearby angles
+# there is some trignometry involved to figured how much ajacent angles to be sampled
+# in rotating, I use the odometry data instead of timing for a more accurate turn
+#               moreover, I slow the robot down as it is approaching the desired location
 
-from utils import get_limits, findArea
+
+
 import rospy, math
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from tf.transformations import euler_from_quaternion
+from std_msgs.msg import Float32MultiArray
+from utils import findDistance
+import numpy as np
 
-class Follow:
-    def __init__(self):
-        #self.point_sub = rospy.Subscriber("point_topic", Polygon, self.follow_callback)
-        self.x1 = 0
-        self.y1 = 0
-        self.z1 = 0
 
-        self.x2 = 0
-        self.y2 = 0
-        self.z2 = 0
+# constant
+diameter = 0.07 # m
+theta_tolerance = 0.2 # rad
+linear_spd, angular_speed = 0.2, math.radians(30) # m/s, rad/s
+safe_distance = 0.3 # m
+follow_distance = 0.5 # m
+foresight_timestamps = np.arange(0, 0.5, 0.1) #s
 
-        self.distance = 0
-        self.theta_angle = 0
 
-        self.follow_array = []
-        #self.follow_pub = rospy.Publisher("follow_topic", Float32MultiArray, queue_size=10)
-    def follow_callback(self, data):
+class FollowBot:
+    def __init__(self, diameter, follow_tolerance):
 
-        if len(data.points) == 0:
-            self.follow_array = []
-            print("Distance", None)
-            print("Theta angle", None)
-            return self.follow_array
+        self.follow_tolerance = follow_tolerance
 
-        print(data.points)
-
-        self.x1 = data.points[0].x
-        self.y1 = data.points[0].y
-        self.z1 = data.points[0].z
-
-        self.x2 = data.points[1].x
-        self.y2 = data.points[1].y
-        self.z2 = data.points[1].z
-
-        img_num_rows = 240
-        img_num_cols = 320
-
-        img_mid_point = (img_num_cols / 2, img_num_rows / 2)
-        obj_mid_point = ((self.x1 + self.x2)/2, (self.y1 + self.y2)/2)
-        img_obj_distance = findDistance(obj_mid_point, img_mid_point)
-
-        area = findArea(self.x1, self.x2, self.y1, self.y2)
-
-        camera_distance = 111 - math.sqrt(area)/0.63
-
-        self.distance = camera_distance / 2
-        self.theta_angle = math.atan2(img_obj_distance, camera_distance)
-
-        print("Distance", self.distance)
-        print("Theta angle", self.theta_angle)
-
-        self.follow_array = []
-        self.follow_array.append(self.distance)
-        self.follow_array.append(self.theta_angle)
-        print("Array", self.follow_array)
+        # subscribed
+        self.distance_at_angle = [0] * 360
+        self.init_laser = False
     
-def findDistance(this_point,another_point):
-    x0 = this_point[0]
-    x1 = another_point[0]
-    y0 = this_point[1]
-    y1 = another_point[1]
-    newDistance = math.sqrt((x1-x0)**2 + (y1-y0)**2)
-    return newDistance
+        self.heading = None
+        self.last_valid_heading = None
+
+
+    def heading_update(self, heading_msg):
+        self.heading = heading_msg
+        if len(self.heading.data) == 2: # valid
+            self.last_valid_heading = heading_msg
+
+    def create_adjusted_twist(self,
+            theta_tolerance = 0.2, # rad 
+            max_lin_speed=0.3, max_ang_spd=math.radians(30)):
+        
+        out_msg = Twist()
+
+        if self.heading is None or len(self.heading.data) == 0: # spin around if no heading is given
+            out_msg.angular.z = max_ang_spd
+            if self.last_valid_heading is not None:
+                last_theta = self.last_valid_heading.data[1]
+                # print("last_theta:", last_theta)
+                out_msg.angular.z *= last_theta / abs(last_theta)
+            return out_msg
+
+        theta = self.heading.data[1]
+        d = self.heading.data[0] # m
+        if d <= 0:
+            return out_msg    
+        if abs(2 * math.pi - theta) < abs(theta):
+            theta = - (2 * math.pi - theta)
+
+        angular_spd_control = min(1, abs(theta) / (max_ang_spd)) # priorize rotating when theta is large
+        lin_spd_control = 1 - angular_spd_control
+
+        if abs(theta) > theta_tolerance:
+            out_msg.angular.z = angular_spd_control * theta * max_ang_spd
+            # make sure angular speed don't exceed max
+            if abs(out_msg.angular.z) >= max_ang_spd:
+                out_msg.angular.z = out_msg.angular.z / abs(out_msg.angular.z) * max_ang_spd
+        if d > follow_distance:
+            out_msg.linear.x = max(max_lin_speed, lin_spd_control * d * max_lin_speed)
+            # return out_msg
+    
+        return out_msg
 
 if __name__ == '__main__':
-    rob = Follow()
+
+    # setup
+    rob = FollowBot(diameter, safe_distance)
     rospy.init_node('follow', anonymous=True)
 
-    rospy.Subscriber("point_topic", Polygon, rob.follow_callback)
+    rospy.Subscriber("/heading", Float32MultiArray, rob.heading_update) # to know the desired heading
+
     rate = rospy.Rate(10)
-
-    pub = rospy.Publisher("/heading", Float32MultiArray, queue_size=10)
+    pub = rospy.Publisher("/mv_cmd", Twist, queue_size=10)
     while not rospy.is_shutdown():
-        data_to_send = Float32MultiArray()
-        data_to_send.data = rob.follow_array # assign the array with the value you want to send
-        pub.publish(data_to_send)
+        msg = rob.create_adjusted_twist(
+            theta_tolerance=theta_tolerance,
+            follow_distance=follow_distance)
+        pub.publish(msg)
         rate.sleep()
+
     rospy.spin()
-
-
-
-
-
-
-
-
