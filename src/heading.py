@@ -63,13 +63,13 @@ class Follow:
         self.distance = camera_distance / 2
         self.theta_angle = math.atan2(img_obj_distance, camera_distance)
 
-        print("Distance", self.distance)
-        print("Theta angle", self.theta_angle)
+        # print("Distance", self.distance)
+        # print("Theta angle", self.theta_angle)
 
         self.follow_array = []
         self.follow_array.append(self.distance)
         self.follow_array.append(self.theta_angle)
-        print("Array", self.follow_array)
+        # print("Array", self.follow_array)
     
 def findDistance(this_point,another_point):
     x0 = this_point[0]
