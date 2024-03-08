@@ -39,6 +39,15 @@ Diep (Emma) Vu: ```/config/config.yaml```, ```/src/heading.py```, ```/src/yellow
 
 Khai Dong: ```/launch/duck_imitator.launch```, ```/launch/test.launch```, ```/src/avoid.py```, ```/config/config.yaml```, ```/src/follow.py```
 
+###### Note
+Since Emma's account is busy running thesis code using python virtual environment, it cannot run roscore and bring up the robot. Hence Emma and Khai both use Khai's account to work on the project at the same time. You just have to trust us that we divided our work equally and ignore git commit history :smile:
+
+###### Reference Links:
+Videos: https://drive.google.com/drive/folders/1mKt4wA_nlJQJNu4LDfLjWiUSs0FW3EY-?usp=sharing
+Gitlab Repo: https://cs-gitlab.union.edu/vud/csc325-final-project
+Slides: https://docs.google.com/presentation/d/1IRhe8ga08-CutmjV4k5fmp90pnPTZu5ANoo-xW8VS7g/edit?usp=sharing
+
+
 
 
 
