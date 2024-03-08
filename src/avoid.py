@@ -33,11 +33,12 @@ foresight_timestamps = np.arange(0.0, 0.8, 0.2)
 sample_angle = 5 
 
 class AvoidBot:
-    def __init__(self, diameter, distance_tolrance):
-           # setup
+    def __init__(self, diameter, distance_tolrance, foresight_timestamps):
+        # setup
         self.diameter = diameter
         self.distance_tolerance = distance_tolrance
         self.ang_samples = [0, *range(1, sample_angle + 1), *range(-1, -sample_angle - 1, -1)]
+        self.foresight_timestamps = foresight_timestamps
 
         # subscribed
         self.x, self.y  = None, None
@@ -46,6 +47,8 @@ class AvoidBot:
 
         self.init_laser = False
 
+        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10)
+
     def laser_update(self, laser_read):
         angles = range(0, 360, 1)
         for angle in angles:
@@ -53,7 +56,8 @@ class AvoidBot:
         self.init_laser = True
 
     def mv_cmd_twist_update(self, twist_msg):
-        self.mv_cmd_twist = twist_msg
+        self.mv_cmd_twist = twist_msg # reactive of follow
+        self.pub.publish(self.foresight_twist(foresight_timestamps))
 
 
     def foresight_obtacles(self, foresight_timestamps):
@@ -112,15 +116,15 @@ class AvoidBot:
             res.linear.y = 0
             res.linear.z = 0
 
-        print("====================================")
-        print(res)
-        print("====================================")
+        # print("====================================")
+        # print(res)
+        # print("====================================")
         return res
 
 if __name__ == '__main__':
 
     # setup
-    rob = AvoidBot(diameter, distance_tolerance)
+    rob = AvoidBot(diameter, distance_tolerance, foresight_timestamps)
     rospy.init_node('avoid', anonymous=True)
 
 
@@ -133,15 +137,5 @@ if __name__ == '__main__':
         print("wait for sensors to response")
         rospy.sleep(wait_period)
     print("Sensors responded")
-
-    rate = rospy.Rate(10)
-    pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10) # command robot to move
-    while not rospy.is_shutdown():
-        # adjust the twist from other node to not hit any objects
-        msg = rob.foresight_twist(foresight_timestamps)
-        if msg is not None:
-            pass
-            pub.publish(msg)
-        rate.sleep()
 
     rospy.spin()

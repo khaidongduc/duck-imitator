@@ -74,7 +74,10 @@ class FollowBot:
         if d > follow_distance:
             out_msg.linear.x = max(max_lin_speed, lin_spd_control * d * max_lin_speed)
             # return out_msg
-    
+
+        # # insert spinning direction in case of inverted camera
+        # out_msg.angular.z = - out_msg.angular.z 
+        
         return out_msg
 
 if __name__ == '__main__':
@@ -89,6 +92,11 @@ if __name__ == '__main__':
     pub = rospy.Publisher("/mv_cmd", Twist, queue_size=10)
     while not rospy.is_shutdown():
         msg = rob.create_adjusted_twist(theta_tolerance=theta_tolerance)
+
+        print("===================================================")
+        print(msg)
+        print("===================================================")
+
         pub.publish(msg)
         rate.sleep()
 

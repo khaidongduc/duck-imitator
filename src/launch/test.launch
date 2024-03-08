@@ -1,0 +1,27 @@
+<launch>
+  
+  <node
+    pkg="duck_imitator"
+    type="yellow_detector.py"
+    name="yellow_detector"
+    output="screen"
+    respawn="true"
+  />
+  
+  <node
+    pkg="duck_imitator"
+    type="heading.py"
+    name="heading"
+    output="screen"
+    respawn="true"
+  />
+
+  <node
+    pkg="duck_imitator"
+    type="follow.py"
+    name="follow"
+    output="screen"
+    respawn="true"
+  />
+
+</launch>
