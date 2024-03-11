@@ -4,12 +4,13 @@
   <version>1.0.0</version>
   <description>The duck_imitator package</description>
 
-
-  <author email="vud@union.edu">vud</maintainer>
-  <author email="dongk@union.edu">dongk</maintainer>
+  <maintainer email="vud@union.edu">vud</maintainer>
+  <maintainer email="dongk@union.edu">dongk</maintainer>
 
   <license>By Our Trust in Mandkind</license>
 
+  <author email="vud@union.edu">vud</author>
+  <author email="dongk@union.edu">dongk</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>cv_bridge</build_depend>
