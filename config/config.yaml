@@ -17,9 +17,9 @@ ANGULAR_SPEED: 30 # DEGREE/S                # maximum angular speed, the script 
 FOLLOW_DISTANCE: 0.5 # M                    # maintain this distance from the targer
 
 # AVOID
-DIAMETER: 0.07			                        # the diameter of the robot, in meter
-DISTANCE_TOLERANCE: 0.2		                  # the safe distance, the robot is going to stop if it is going to go near
-					                                  # and obstacles this much, in meter
+DIAMETER: 0.07                              # the diameter of the robot, in meter
+DISTANCE_TOLERANCE: 0.2                     # the safe distance, the robot is going to stop if it is going to go near
+                                            # and obstacles this much, in meter
 FORESIGHT_TIMESTAMPS: [0.0, 0.2, 0.4, 0.6]  # try to forsights there times forward, in second
-				                                    # how much neighour angles to sample aside from the closest angle 
-SAMPLE_ANGLE: 5						                  # towards the moving direction, in degree
+                                            # how much neighour angles to sample aside from the closest angle 
+SAMPLE_ANGLE: 5                             # towards the moving direction, in degree
